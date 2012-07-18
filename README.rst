@@ -68,7 +68,7 @@ Query
 
 Find all data::
 
-    db.table('user').find().fetch()
+    db.table('user').fetch()
 
 Find all specified data::
 
@@ -124,7 +124,7 @@ Delete
 
 Delete all data::
 
-    db.table('user').find().delete()
+    db.table('user').delete()
     db.commit()
 
 Delete specified data::
