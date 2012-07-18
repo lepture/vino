@@ -15,7 +15,7 @@ except ImportError:
     install_requires.append('argparse')
 
 kwargs['install_requires'] = install_requires
-kwargs['packages'] = ['vino']
+kwargs['packages'] = ['vino', 'vino.engines']
 
 import vino
 from email.utils import parseaddr
