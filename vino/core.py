@@ -35,7 +35,7 @@ class _Database(object):
 
     def __init__(self, db):
         # mysql://user:pass@localhost:port/db
-        self.engine, host = db.splite('://')
+        self.engine, host = db.split('://')
         if '@' not in host:
             self.host = host
             return
