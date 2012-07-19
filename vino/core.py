@@ -9,15 +9,12 @@ class Vino(object):
         self._db = _connect(db, **kwargs)
 
     def table(self, name):
-        self.last_query_time = time.time()
         return Query(self._db, name)
 
     def raw(self, statement):
-        self.last_query_time = time.time()
         pass
 
     def commit(self):
-        self.last_query_time = time.time()
         pass
 
     @property
