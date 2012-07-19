@@ -133,6 +133,38 @@ Delete specified data::
     db.commit()
 
 
+Describe
+----------
+
+Describe a table::
+
+    db.table('user').describe()
+
+    # return
+    {
+        "items": {
+            "id": {
+                "type": "int",
+                "default": None,
+            },
+            "username": {
+                "type": "string",
+                "length": 50,
+                "default": "Guest",
+            },
+            "email": {
+                "type": "string",
+                "length": 200,
+                "default": None,
+            }
+        },
+        "index": [
+            "username",
+        ],
+        "primary": "id",
+    }
+
+
 FAQ
 -----
 
