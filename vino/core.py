@@ -1,20 +1,25 @@
 #!/usr/bin/env python
 
+import time
+from .query import Query
+
 
 class Vino(object):
-    last_query = None
-    last_query_time = None
+    last_query_time = time.time()
 
     def __init__(self, db, **kwargs):
         self._db = _connect(db, **kwargs)
 
     def table(self, name):
-        pass
+        self.last_query_time = time.time()
+        return Query(self._db, name)
 
     def raw(self, statement):
+        self.last_query_time = time.time()
         pass
 
     def commit(self):
+        self.last_query_time = time.time()
         pass
 
 
