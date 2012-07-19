@@ -5,8 +5,6 @@ from .query import Query
 
 
 class Vino(object):
-    last_query_time = time.time()
-
     def __init__(self, db, **kwargs):
         self._db = _connect(db, **kwargs)
 
@@ -21,6 +19,10 @@ class Vino(object):
     def commit(self):
         self.last_query_time = time.time()
         pass
+
+    @property
+    def last_query_time(self):
+        return self._db._last_use_time
 
 
 class _Database(object):
@@ -48,13 +50,30 @@ class _Database(object):
 
 
 def _connect(db, **kwargs):
+    global IntegrityError
+    global OperationalError
+
     d = _Database(db)
+
     if d.engine == 'sqlite':
-        from .engines._sqlite import Connection
-        return Connection(d.host)
-    elif d.engine == 'mysqlite':
-        from .engines._mysql import Connection
+        from .engines import _sqlite as engine
+        IntegrityError = engine.IntegrityError
+        OperationalError = engine.OperationalError
+        return engine.Connection(d.host)
+
+    elif d.engine == 'mysql':
+        from .engines import _sqlite as engine
+        IntegrityError = engine.IntegrityError
+        OperationalError = engine.OperationalError
+
         max_idle_time = kwargs.pop('max_idle_time', 7 * 3600)
-        return Connection(d.host, d.dbname, d.user, d.passwd, max_idle_time)
+        return engine.Connection(
+            d.host, d.dbname, d.user, d.passwd, max_idle_time
+        )
+
     else:
         raise ValueError("Doesn't support %s yet" % d.engine)
+
+
+IntegrityError = None
+OperationalError = None

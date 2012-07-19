@@ -129,7 +129,7 @@ class Connection(object):
         if not rows:
             return None
         elif len(rows) > 1:
-            raise Exception("Multiple rows returned for Database.get() query")
+            raise Exception("Multiple rows returned for get query")
         else:
             return rows[0]
 
