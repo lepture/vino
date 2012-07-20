@@ -1,15 +1,18 @@
 #!/usr/bin/env python
 
+import logging
+
 
 class Query(object):
-    _where_statement = []
-    _order_statement = []
-    _limit_statement = None
-    _offset_statement = None
-
     def __init__(self, db, table):
         self.db = db
         self.table = table
+
+        self._where_statement = []
+        self._order_statement = []
+        self._limit_statement = None
+        self._offset_statement = None
+        self._find_kwargs = []
 
     def find(self, **kwargs):
         """where statement
@@ -18,11 +21,22 @@ class Query(object):
 
         - ``name__in = []``
         """
+
         for key in kwargs:
-            # TODO: in, like, or
-            # bits = key.split('__')
-            statement = '%s = "%s"' % (key, kwargs[key])
-            self._where_statement.append(statement)
+            bits = key.split('__')
+            name = bits[0]
+            if len(bits) > 1:
+                opt = bits[1]
+            else:
+                opt = '='
+
+            if name in self._find_kwargs:
+                logging.warn('%s already in clause, ignore' % name)
+            else:
+                #TODO opt
+                statement = '%s %s "%s"' % (name, opt, kwargs[key])
+                self._where_statement.append(statement)
+                self._find_kwargs.append(name)
 
         return self
 
@@ -79,7 +93,7 @@ class Query(object):
 
     def _create_query_statement(self):
         statement = []
-        statement.append('WHERE %s' % 'AND '.join(self._where_statement))
+        statement.append('WHERE %s' % ' AND '.join(self._where_statement))
         if self._order_statement:
             order = self._order_statement.pop()
             statement.append('ORDER BY %s' % order)
