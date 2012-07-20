@@ -144,17 +144,17 @@ Describe a table::
     {
         "columns": {
             "id": {
-                "type": "int",
+                "type": "integer",
                 "null": False,
             },
             "username": {
-                "type": "string",
+                "type": "varchar",
                 "length": 50,
                 "null": False,
                 "unique": True,
             },
             "email": {
-                "type": "string",
+                "type": "varchar",
                 "length": 200,
                 "null": False,
                 "unique": True,
