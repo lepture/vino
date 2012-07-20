@@ -4,7 +4,8 @@
 class Query(object):
     _where_statement = []
     _order_statement = []
-    _end_of_statement = False
+    _limit_statement = None
+    _offset_statement = None
 
     def __init__(self, db, table):
         self.db = db
@@ -17,9 +18,6 @@ class Query(object):
 
         - ``name__in = []``
         """
-        if self._end_of_statement:
-            return self
-
         for key in kwargs:
             # TODO: in, like, or
             # bits = key.split('__')
@@ -29,9 +27,6 @@ class Query(object):
         return self
 
     def order(self, name):
-        if self._end_of_statement:
-            return self
-
         direct = 'ASC'
         if name.startswith('-'):
             direct = 'DESC'
@@ -41,8 +36,18 @@ class Query(object):
         self._order_statement.append(statement)
         return self
 
-    def fetch(self, limit=None, offset=None, attr=None):
-        self._end_of_statement = True
+    def limit(self, limit):
+        self._limit_statement = int(limit)
+        return self
+
+    def offset(self, offset):
+        self._offset_statement = int(offset)
+        return self
+
+    def fetch(self, limit=None, attr=None):
+        if limit:
+            self._limit_statement = int(limit)
+
         statement = []
         if attr:
             if isinstance(attr, basestring):
@@ -53,31 +58,36 @@ class Query(object):
             select = '*'
         statement.append('SELECT %s' % select)
         statement.append('FROM %s' % self.table)
+        statement.append(self._create_query_statement())
+        result = self.db.query(' '.join(statement))
+
+        if limit == 1 and result:
+            return result[0]
+        return result
+
+    def create(self, **kwargs):
+        pass
+
+    def update(self, **kwargs):
+        pass
+
+    def delete(self, **kwargs):
+        pass
+
+    def describe(self):
+        pass
+
+    def _create_query_statement(self):
+        statement = []
         statement.append('WHERE %s' % 'AND '.join(self._where_statement))
         if self._order_statement:
             order = self._order_statement.pop()
             statement.append('ORDER BY %s' % order)
 
-        if offset:
-            statement.append('OFFSET %s' % limit)
+        if self._offset_statement:
+            statement.append('OFFSET %s' % self._offset_statement)
 
-        if limit:
-            statement.append('LIMIT %s' % limit)
+        if self._limit_statement:
+            statement.append('LIMIT %s' % self._limit_statement)
 
-        return self.db.query(' '.join(statement))
-
-    def create(self, **kwargs):
-        self._end_of_statement = True
-        pass
-
-    def update(self, **kwargs):
-        self._end_of_statement = True
-        pass
-
-    def delete(self, **kwargs):
-        self._end_of_statement = True
-        pass
-
-    def describe(self):
-        self._end_of_statement = True
-        pass
+        return ' '.join(statement)

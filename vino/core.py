@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 
-import time
 from .query import Query
 
 
@@ -12,7 +11,7 @@ class Vino(object):
         return Query(self._db, name)
 
     def raw(self, statement):
-        pass
+        return self._db.query(statement)
 
     def commit(self):
         pass
