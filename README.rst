@@ -142,20 +142,25 @@ Describe a table::
 
     # return
     {
-        "items": {
+        "columns": {
             "id": {
                 "type": "int",
-                "default": None,
+                "null": False,
             },
             "username": {
                 "type": "string",
                 "length": 50,
-                "default": "Guest",
+                "null": False,
+                "unique": True,
             },
             "email": {
                 "type": "string",
                 "length": 200,
-                "default": None,
+                "null": False,
+                "unique": True,
+            },
+            "created": {
+                "type": "datetime"
             }
         },
         "index": [
