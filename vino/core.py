@@ -58,7 +58,7 @@ def _connect(db, **kwargs):
         return engine.Connection(d.host)
 
     elif d.engine == 'mysql':
-        from .engines import _sqlite as engine
+        from .engines import _mysql as engine
         IntegrityError = engine.IntegrityError
         OperationalError = engine.OperationalError
 
