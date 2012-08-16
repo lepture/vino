@@ -10,8 +10,14 @@ class Vino(object):
     def table(self, name):
         return Query(self._db, name)
 
-    def raw(self, statement):
-        return self._db.query(statement)
+    def query(self, query, *parameters):
+        return self._db.query(query, *parameters)
+
+    def get(self, query, *parameters):
+        return self._db.get(query, *parameters)
+
+    def execute(self, query, *parameters):
+        return self._db.execute(query, *parameters)
 
     def commit(self):
         pass
