@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# coding: utf-8
 
 import logging
 
@@ -22,6 +23,22 @@ class Query(object):
         - ``name__in = []``
         """
 
+        def parse(opt, value):
+            if opt == 'like' or opt == 'contains':
+                return 'LIKE', ''.join(['%', value, '%'])
+            if opt == 'startswith':
+                return 'LIKE', ''.join([value, '%'])
+            if opt == 'endswith':
+                return 'LIKE', ''.join(['%', value])
+            if opt == 'in' and isinstance(value, (list, tuple)):
+                if len(value) == 0:
+                    return None
+                if len(value) == 1:
+                    return '=', value[0]
+                #TODO unicode
+                return 'IN', str(value)
+            return opt.upper(), value
+
         for key in kwargs:
             bits = key.split('__')
             name = bits[0]
@@ -30,15 +47,20 @@ class Query(object):
             else:
                 opt = '='
 
+            opt, value = parse(opt, kwargs[key])
+
             if name in self._find_kwargs:
                 logging.warn('%s already in clause, ignore' % name)
-            else:
-                #TODO opt
-                statement = '%s %s "%s"' % (name, opt, kwargs[key])
+            elif value:
+                statement = '%s %s "%s"' % (name, opt, value)
                 self._where_statement.append(statement)
                 self._find_kwargs.append(name)
 
         return self
+
+    def where(self, **kwargs):
+        # this is an alias of find
+        return self.find(**kwargs)
 
     def order(self, name):
         direct = 'ASC'
@@ -58,10 +80,7 @@ class Query(object):
         self._offset_statement = int(offset)
         return self
 
-    def fetch(self, limit=None, attr=None):
-        if limit:
-            self._limit_statement = int(limit)
-
+    def fetch(self, attr=None):
         statement = []
         if attr:
             if isinstance(attr, basestring):
@@ -75,7 +94,7 @@ class Query(object):
         statement.append(self._create_query_statement())
         result = self.db.query(' '.join(statement))
 
-        if limit == 1 and result:
+        if self._limit_statement == 1 and result:
             return result[0]
         return result
 
@@ -90,6 +109,9 @@ class Query(object):
 
     def describe(self):
         pass
+
+    def count(self):
+        return self.db.query('SELECT count(*) FROM %s' % self.table)
 
     def _create_query_statement(self):
         statement = []
