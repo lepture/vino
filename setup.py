@@ -8,13 +8,6 @@ if major >= 3:
     kwargs['use_2to3'] = True
 
 from setuptools import setup
-install_requires = []
-try:
-    import argparse  # python 2.7+ support argparse
-except ImportError:
-    install_requires.append('argparse')
-
-kwargs['install_requires'] = install_requires
 kwargs['packages'] = ['vino', 'vino.engines']
 
 import vino
