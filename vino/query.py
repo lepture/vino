@@ -35,8 +35,8 @@ class Query(object):
                     return None
                 if len(value) == 1:
                     return '=', value[0]
-                #TODO unicode
-                return 'IN', str(value)
+                val = '(%s)' % ','.join(map(lambda o: '"%s"' % o, value))
+                return 'IN', val
             return opt.upper(), value
 
         for key in kwargs:
@@ -51,11 +51,14 @@ class Query(object):
 
             if name in self._find_kwargs:
                 logging.warn('%s already in clause, ignore' % name)
+            if opt == 'IN':
+                statement = '%s %s %s' % (name, opt, value)
+                self._where_statement.append(statement)
+                self._find_kwargs.append(name)
             elif value:
                 statement = '%s %s "%s"' % (name, opt, value)
                 self._where_statement.append(statement)
                 self._find_kwargs.append(name)
-
         return self
 
     def where(self, **kwargs):
@@ -115,7 +118,10 @@ class Query(object):
 
     def _create_query_statement(self):
         statement = []
-        statement.append('WHERE %s' % ' AND '.join(self._where_statement))
+        if self._where_statement:
+            statement.append(
+                'WHERE %s' % ' AND '.join(self._where_statement)
+            )
         if self._order_statement:
             order = self._order_statement.pop()
             statement.append('ORDER BY %s' % order)
